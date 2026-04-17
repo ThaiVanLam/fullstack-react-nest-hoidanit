@@ -9,26 +9,32 @@ export const axiosInstance = axios.create({
   },
 });
 
-// Request interceptor — attach access token from memory
-axiosInstance.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// Request interceptor: attach access token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
-// Response interceptor — auto-refresh on 401
+// Response interceptor: handle 401 + auto-refresh
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (err: unknown) => void;
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
 }> = [];
 
 const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((p) => {
-    if (error) p.reject(error);
-    else p.resolve(token!);
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
   });
   failedQueue = [];
 };
@@ -36,35 +42,36 @@ const processQueue = (error: unknown, token: string | null = null) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config as typeof error.config & {
-      _retry?: boolean;
-    };
+    const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return axiosInstance(originalRequest);
-        });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const { data } = await axiosInstance.post<{
-          data: { accessToken: string };
-        }>('/auth/refresh');
-        const newToken = data.data.accessToken;
+        const response = await axiosInstance.post<{ data: { accessToken: string } }>(
+          '/auth/refresh',
+        );
+        const newToken = response.data.data.accessToken;
         setAccessToken(newToken);
         processQueue(null, newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        setAccessToken(null);
+        clearAccessToken();
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -75,10 +82,11 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-// In-memory token storage (never localStorage for security)
-let _accessToken: string | null = null;
+// In-memory token storage (NOT localStorage — security best practice)
+let accessToken: string | null = null;
 
-export const getAccessToken = () => _accessToken;
-export const setAccessToken = (token: string | null) => {
-  _accessToken = token;
-};
+export const getAccessToken = () => accessToken;
+export const setAccessToken = (token: string) => { accessToken = token; };
+export const clearAccessToken = () => { accessToken = null; };
+
+export default axiosInstance;

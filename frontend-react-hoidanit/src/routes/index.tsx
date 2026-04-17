@@ -4,60 +4,67 @@ import { AuthLayout } from '@/layouts/AuthLayout';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { AdminRoute } from './AdminRoute';
-import { ROUTES } from './routes';
+import { RoleListPage } from '@/features/auth/pages/RoleListPage';
+import { RoleCreatePage } from '@/features/auth/pages/RoleCreatePage';
+import { RoleEditPage } from '@/features/auth/pages/RoleEditPage';
+import { UserListPage } from '@/features/auth/pages/UserListPage';
+import { UserEditPage } from '@/features/auth/pages/UserEditPage';
 
-// Placeholder pages — replace with real pages when features are built
-const Placeholder = ({ title }: { title: string }) => (
-  <div className="p-8 text-center text-gray-500">{title}</div>
-);
+// Pages will be added here as features are built with /fe-crud
+const HomePage = () => <div className="p-8 text-center"><h1 className="text-2xl font-bold">Home Page</h1></div>;
+const NotFoundPage = () => <div className="p-8 text-center"><h1 className="text-2xl font-bold">404 - Not Found</h1></div>;
 
 export const router = createBrowserRouter([
   // Public routes
   {
+    path: '/',
     element: <MainLayout />,
     children: [
-      { path: ROUTES.HOME, element: <Placeholder title="Home Page" /> },
-      { path: ROUTES.PRODUCTS, element: <Placeholder title="Products Page" /> },
-      { path: ROUTES.PRODUCT_DETAIL, element: <Placeholder title="Product Detail Page" /> },
-      { path: ROUTES.CATEGORY, element: <Placeholder title="Category Page" /> },
+      { index: true, element: <HomePage /> },
+      // Add public routes here: products, categories, etc.
     ],
   },
-  // Auth routes
+
+  // Auth routes (login, register)
   {
     element: <AuthLayout />,
     children: [
-      { path: ROUTES.LOGIN, element: <Placeholder title="Login Page" /> },
-      { path: ROUTES.REGISTER, element: <Placeholder title="Register Page" /> },
+      // Add auth routes here
     ],
   },
-  // Protected routes
+
+  // Protected routes (require login)
   {
     element: <ProtectedRoute />,
     children: [
       {
         element: <MainLayout />,
         children: [
-          { path: ROUTES.CART, element: <Placeholder title="Cart Page" /> },
-          { path: ROUTES.CHECKOUT, element: <Placeholder title="Checkout Page" /> },
-          { path: ROUTES.ORDERS, element: <Placeholder title="Orders Page" /> },
-          { path: ROUTES.ORDER_DETAIL, element: <Placeholder title="Order Detail Page" /> },
-          { path: ROUTES.PROFILE, element: <Placeholder title="Profile Page" /> },
-          { path: ROUTES.ADDRESSES, element: <Placeholder title="Addresses Page" /> },
+          // Add protected routes: cart, checkout, orders, profile
         ],
       },
     ],
   },
+
   // Admin routes
   {
+    path: '/admin',
     element: <AdminRoute />,
     children: [
       {
         element: <AdminLayout />,
         children: [
-          { path: ROUTES.ADMIN_PRODUCTS, element: <Placeholder title="Admin Products" /> },
-          { path: ROUTES.ADMIN_ORDERS, element: <Placeholder title="Admin Orders" /> },
+          { path: 'roles', element: <RoleListPage /> },
+          { path: 'roles/create', element: <RoleCreatePage /> },
+          { path: 'roles/:id/edit', element: <RoleEditPage /> },
+          { path: 'users', element: <UserListPage /> },
+          { path: 'users/:id/edit', element: <UserEditPage /> },
+          // Add more admin routes here
         ],
       },
     ],
   },
+
+  // 404
+  { path: '*', element: <NotFoundPage /> },
 ]);

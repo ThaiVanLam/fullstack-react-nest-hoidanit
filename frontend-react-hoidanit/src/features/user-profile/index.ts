@@ -1,1 +1,2 @@
-// User Profile feature public API
+// Barrel exports for user-profile feature
+// Add exports here as components/hooks are created

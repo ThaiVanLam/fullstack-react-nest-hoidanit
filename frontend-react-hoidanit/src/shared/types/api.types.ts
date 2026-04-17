@@ -1,34 +1,25 @@
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
 }
 
-export interface PaginatedResponse<T = unknown> {
+export interface PaginatedResponse<T> {
   success: boolean;
   data: T[];
-  meta: PaginationMeta;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
-export interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
-export interface ApiErrorResponse {
+export interface ApiError {
   success: false;
   error: {
     code: string;
     message: string;
     details?: Record<string, unknown>;
   };
-}
-
-export interface PaginationQuery {
-  page?: number;
-  limit?: number;
-  sort?: string;
-  order?: 'asc' | 'desc';
 }

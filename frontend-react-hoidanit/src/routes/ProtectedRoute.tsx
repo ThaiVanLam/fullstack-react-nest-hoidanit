@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from 'react-router';
 import { ROUTES } from './routes';
 
-// TODO: replace with real auth store once auth feature is implemented
+// Placeholder: will connect to useAuthStore when auth feature is built
 const useIsAuthenticated = () => {
+  // TODO: replace with useAuthStore().isAuthenticated
   return false;
 };
 

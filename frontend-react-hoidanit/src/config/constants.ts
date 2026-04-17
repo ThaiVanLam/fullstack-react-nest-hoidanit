@@ -1,6 +1,8 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1';
 
-export const APP_NAME = 'HoiDanIT Shop';
+export const APP_NAME = 'HoiDanIT Ecommerce';
 
-export const MAX_FILE_SIZE_MB = 5;
-export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const PAGINATION_DEFAULTS = {
+  PAGE: 1,
+  LIMIT: 10,
+} as const;

@@ -15,7 +15,7 @@ export class RolesService {
 
   constructor(private readonly roleRepository: RoleRepository) {}
 
-  findAll(): Promise<Role[]> {
+  async findAll(): Promise<Role[]> {
     return this.roleRepository.findAll();
   }
 
@@ -29,27 +29,30 @@ export class RolesService {
 
   async create(dto: CreateRoleDto): Promise<Role> {
     this.logger.log(`Creating role: ${dto.name}`);
+
     const existing = await this.roleRepository.findByName(dto.name);
     if (existing) {
       throw new ConflictException(`Role "${dto.name}" already exists`);
     }
+
     return this.roleRepository.save({ name: dto.name });
   }
 
   async update(id: number, dto: UpdateRoleDto): Promise<Role> {
     const role = await this.findOne(id);
-    if (dto.name && dto.name !== role.name) {
-      const existing = await this.roleRepository.findByName(dto.name);
-      if (existing) {
-        throw new ConflictException(`Role "${dto.name}" already exists`);
-      }
+
+    const nameConflict = await this.roleRepository.findByName(dto.name);
+    if (nameConflict && nameConflict.id !== id) {
+      throw new ConflictException(`Role "${dto.name}" already exists`);
     }
-    return this.roleRepository.save({ ...role, ...dto });
+
+    role.name = dto.name;
+    return this.roleRepository.save(role);
   }
 
   async remove(id: number): Promise<void> {
-    await this.findOne(id);
-    this.logger.log(`Deleting role #${id}`);
+    await this.findOne(id); // throws 404 if not found
     await this.roleRepository.delete(id);
+    this.logger.log(`Deleted role #${id}`);
   }
 }

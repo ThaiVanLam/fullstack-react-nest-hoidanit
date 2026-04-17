@@ -2,16 +2,19 @@ import { Outlet } from 'react-router';
 
 export const MainLayout = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b px-6 py-4">
-        <span className="font-semibold text-lg">HoiDanIT Shop</span>
+    <div className="min-h-screen bg-white">
+      {/* Header - add <Header /> here when shared/components/layout is built */}
+      <header className="border-b border-gray-200 px-4 py-3">
+        <div className="mx-auto max-w-7xl">
+          <span className="font-bold text-gray-900">HoiDanIT Shop</span>
+        </div>
       </header>
-      <main className="flex-1 container mx-auto px-4 py-6">
+
+      <main className="mx-auto max-w-7xl px-4 py-6">
         <Outlet />
       </main>
-      <footer className="border-t px-6 py-4 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} HoiDanIT Shop
-      </footer>
+
+      {/* Footer - add <Footer /> here when built */}
     </div>
   );
 };

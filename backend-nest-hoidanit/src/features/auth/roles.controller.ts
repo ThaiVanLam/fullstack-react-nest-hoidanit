@@ -7,20 +7,14 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
-  UseGuards,
+  Put,
 } from '@nestjs/common';
-import { Roles } from '../../shared/decorators/roles.decorator';
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
-import { RolesGuard } from '../../shared/guards/roles.guard';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RolesService } from './roles.service';
 
 @Controller('admin/roles')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
@@ -39,7 +33,7 @@ export class RolesController {
     return this.rolesService.create(dto);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRoleDto) {
     return this.rolesService.update(id, dto);
   }
